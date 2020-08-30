@@ -11,4 +11,4 @@ After installation, the Enigma app connects the Metatrader platform on the User'
 The Trading System in https://github.com/Z-VV/Update  ,sends POST request to the API framework everytime it detects trading opurtunities.
 The signals are retrieved by the Enigma app and it executes them on the user's MT platform.
 
-The website recieves PayPall subscribtion payments and handles all emails,tokens and processes automatically.
+The website recieves PayPall IPN and handles all emails,tokens and processes automatically.
