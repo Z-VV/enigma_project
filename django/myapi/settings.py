@@ -152,7 +152,7 @@ STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR),'static\\')
 MEDIA_ROOT = os.path.join(BASE_DIR, "media\\")
 
 #PayPall
-PAYPAL_RECEIVER_EMAIL = 'sb-8rwxz2352789@business.example.com'
+
 
 PAYPAL_TEST = True
 
@@ -160,8 +160,7 @@ PAYPAL_TEST = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 MAILER_EMAIL_BACKEND = EMAIL_BACKEND
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_PASSWORD = 'Python83'
-EMAIL_HOST_USER = 'malkiqtmuk@gmail.com'
+
 EMAIL_PORT = 587
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
