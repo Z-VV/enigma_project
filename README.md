@@ -2,9 +2,6 @@
 www.enigma-lab.com
 Web and desktop apps using Django and Tkinter.
 
-The project is in its final testing phase and is yet to fully deployed.
-The files uploaded are for the purpose of showcasing my development skills to support my job application with your organisation.
-
 After registration on the website main page,the user will be able to download the desktop application installer.
 The web app then generates one week trial API token and sends it to the user via Gmail.
 After installation, the Enigma app connects the Metatrader platform on the User's desk machine with the website via the provided API token.
