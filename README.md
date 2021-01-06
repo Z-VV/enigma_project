@@ -1,6 +1,6 @@
-# enigma_project
-www.enigma-lab.com
-Web and desktop apps using Django and Tkinter.
+www.enigma-lab.com  :
+ Automated Trading Software  :
+ Web and desktop apps using Django and Tkinter :
 
 After registration on the website main page,the user will be able to download the desktop application installer.
 The web app then generates one week trial API token and sends it to the user via Gmail.
