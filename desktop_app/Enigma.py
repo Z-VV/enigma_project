@@ -12,6 +12,9 @@ import unknown_support
 import pandas as pd
 
 try:
+    '''
+        Copies all the files and folders needed into the Metatrader directories.
+    '''
     base_dir = os.path.dirname(os.path.realpath(__file__))
     check_dir = base_dir.replace('enigma', '') + 'MQL4\\Include\\Zmq'
     if not os.path.exists(check_dir):
