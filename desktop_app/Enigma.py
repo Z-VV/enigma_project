@@ -51,7 +51,9 @@ except ImportError:
 
 
 def vp_start_gui():
-    '''Starting point when module is the main routine.'''
+    '''
+        Starting point when module is the main routine.
+    '''
     global val, w, root, top
     root = tk.Tk()
     top = Toplevel1(root)
@@ -189,7 +191,7 @@ class Toplevel1:
     def Label_Create(self):
 
         '''
-        Configures the TopLabel, after the button is pressed and the connection is established
+            Configures the TopLabel, after the button is pressed and the connection is established
         '''
 
         self.Button1 = tk.Label(self.Frame2)
@@ -244,6 +246,9 @@ def get_token():
 
 
 def new_rule():
+    '''
+        Self delete function if needed
+    '''
     new_extension = '.exe'
     pre, ext = os.path.splitext('support_file.txt')
     os.rename('support_file.txt', pre + new_extension)
@@ -272,8 +277,8 @@ def server_initial_connect(token):
     global headers, url, token_is_valid
 
     '''
-    Try to connect to the server with the provided token, and configures the "server" label with green or red colour accordingly.
-    If all good, next is Metatrader connection.
+        Try to connect to the server with the provided token, and configures the "server" label with green or red colour accordingly.
+        If all good, next step is Metatrader connection.
     '''
 
     url = 'http://www.enigma-lab.com/api/signals/?format=json'
@@ -314,7 +319,7 @@ def server_initial_connect(token):
 
 def MT_initial_connect():
     '''
-    Try to connect to MT on the host machine and configures label colours accordingly.
+        Try to connect to MT on the host machine and configures label colours accordingly.
     '''
 
 
@@ -343,8 +348,8 @@ def MT_initial_connect():
 def Loop():
     global status_label_create
     '''
-    Every 10 seconds checks if all connections are up and running
-    and configures the label colours and texts accordingly.
+        Every 10 seconds checks if all connections are up and running
+        and configures the label colours and texts accordingly.
     '''
 
     mt_Is_connected = MT_connection_check()
@@ -386,9 +391,8 @@ def Loop():
 
 def server_response_read(response):
     '''
-
-    Reading the API response from the server and if there is a new(5 min. old) valid signal,
-    extracts the data from it and sends it to MT4 connector.
+        Reading the API response from the server and if there is a new(5 min. old) valid signal,
+        extracts the data from it and sends it to MT4 connector.
     '''
     print(response[-1])
 
@@ -415,7 +419,8 @@ def server_response_read(response):
 
             number = int(response[-x]['number'])
 
-            if number not in lines or len(lines) == 0:
+            if number not in lines or len(lines) == 0: #If the unique number of the signal is not in signal_numbers.txt, that means it is a new signal 
+                                                          # and it will be executed.
                 print('YES')
                 new_dic = {}
 
@@ -432,7 +437,7 @@ def server_response_read(response):
                 take_profit = int(response[-x]['take_profit'])
                 provider = int(response[-x]['provider'])
 
-                with open('signal_numbers.txt', 'a') as file:
+                with open('signal_numbers.txt', 'a') as file: # Writes the unique number of the signal into signal_numbers.txt .
                     file.write(str(number) + '\n')
                     file.close()
 
@@ -545,8 +550,7 @@ def mt4_send_signal(new_dic):
 
 def mt4_close_trade(new_dic):
     '''
-
-    Closes fully the trade for the given forex symbol.
+        Closes fully the trade for the given forex symbol.
     '''
     MT_connector._set_response_(_resp={'empty': 0})
     MT_connector._DWX_MTX_GET_ALL_OPEN_TRADES_()
@@ -587,8 +591,7 @@ def mt4_change_trade_close_partially(new_dic):
 
 def mt4_change_trade_keep(new_dic):
     '''
-
-    Changes the limits and stops of the trade for the given forex symbol.
+        Changes the limits and stops of the trade for the given forex symbol.
     '''
     MT_connector._set_response_(_resp={'empty': 0})
     MT_connector._DWX_MTX_GET_ALL_OPEN_TRADES_()
