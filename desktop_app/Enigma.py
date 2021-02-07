@@ -16,7 +16,6 @@ import unknown_support
 import pandas as pd
 import traceback
 
-
 try:
     base_dir = os.path.dirname(os.path.realpath(__file__))
     check_dir = base_dir.replace('enigma','')+'MQL4\\Include\\Zmq'
