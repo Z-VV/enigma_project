@@ -30,14 +30,8 @@ try:
         shutil.copy('enigma.ex4', base_dir.replace('enigma', '') + 'MQL4\\Experts')
 except:
     pass
-
 if not os.path.exists('signal_numbers.txt'):
     open("signal_numbers.txt", 'w').close()
-
-
-running = False
-status_label_create = True
-token_is_valid = True
 
 try:
     import Tkinter as tk
@@ -50,8 +44,7 @@ try:
 except ImportError:
     import tkinter.ttk as ttk
     py3 = True
-
-
+    
 def vp_start_gui():
     '''Starting point when module is the main routine.'''
     global val, w, root,top
@@ -80,6 +73,7 @@ def destroy_Toplevel1():
     w.destroy()
     w = None
 
+    
 class Toplevel1:
     def __init__(self, top=None):
         '''This class configures and populates the toplevel window.
@@ -109,9 +103,7 @@ class Toplevel1:
         top.configure(cursor="arrow")
         top.configure(highlightbackground="#d9d9d9")
         top.configure(highlightcolor="black")
-
-
-
+        
         self.Frame1 = tk.Frame(top)
         self.Frame1.place(relx=0.003, rely=0, relheight=1.021
                 , relwidth=0.997)
@@ -188,7 +180,6 @@ class Toplevel1:
         self.spinLabel.place(relx=0.032, rely=0.25, height=23, width=48)
         self.spinLabel.configure(background="#686868",text='Lot Size:')
 
-
     def Label_Create(self):
         self.Button1 = tk.Label(self.Frame2)
         self.Button1.place(relx=0.095, rely=0.766, height=33, width=306)
@@ -210,10 +201,8 @@ class RightClicker:
         commands = ["Cut","Copy","Paste"]
         menu = tk.Menu(None, tearoff=0, takefocus=0)
         menu.configure(background="#686868")
-
         for txt in commands:
             menu.add_command(label=txt, command=lambda e = e, txt=txt:self.click_command(e,txt))
-
         menu.tk_popup(e.x_root + 40, e.y_root + 10, entry="0")
 
     def click_command(self, e, cmd):
@@ -277,7 +266,6 @@ class Run:
                     top.Label2.configure(foreground='#cf305d')
             else:
                 top.Label2.configure(foreground='#cf305d')
-
 
     def button_press(self):
         if self.get_token():
@@ -359,18 +347,15 @@ class Run:
         root.after(10000, self.scanning)
 
     def server_response_read(self):
-
         if len(self.response) <= 3:
             number_scanned_signals = len(self.response)
         else:
             number_scanned_signals = 4
         for x in range(1, number_scanned_signals):
-
             signal_date_str = self.response[-x]['created'].split('T')[0]
             signal_time_str = self.response[-x]['created'].split('T')[1].replace('Z', '').split('.')[0]
             dt_signal_time = datetime.strptime(signal_date_str + ' ' + signal_time_str, '%Y-%m-%d %H:%M:%S')
             time_difference = datetime.utcnow() - dt_signal_time
-
             if time_difference <= timedelta(minutes=5):
                 print(-x)
                 print(self.response[-x])
@@ -386,7 +371,6 @@ class Run:
                 if number not in lines or len(lines) == 0:
                     print('YES')
                     new_dic = {}
-
                     print(self.response[-x]['signal_type'])
                     print(self.response[-x]['symbol'])
                     print(self.response[-x]['buy_sell'])
@@ -399,7 +383,6 @@ class Run:
                     stop_loss = int(self.response[-x]['stop_loss'])
                     take_profit = int(self.response[-x]['take_profit'])
                     provider = int(self.response[-x]['provider'])
-
                     with open('signal_numbers.txt', 'a') as file:
                         file.write(str(number) + '\n')
                         file.close()
@@ -447,34 +430,27 @@ class Run:
             self.send_report(str(self.response)+str(traceback.print_exc()))
             self.server_is_connected = False
 
-
     def Loop(self):
-
         self.MT_connection_check()
         self.Server_connection_check()
-
         if self.MT_is_connected and not self.server_is_connected:
             top.Label4.configure(background="#519c98")
             top.Label3.configure(background='#cf305d')
             top.Button1.configure(background='#cf305d')
             top.Button1.configure(text='''NOT CONNECTED ''')
-
         elif not self.MT_is_connected and self.server_is_connected:
             top.Label3.configure(background="#519c98")
             top.Label4.configure(background='#cf305d')
             top.Button1.configure(background='#cf305d')
             top.Button1.configure(text='''NOT CONNECTED ''')
-
         elif not self.MT_is_connected and not self.server_is_connected:
             top.Label3.configure(background='#cf305d')
             top.Label4.configure(background='#cf305d')
             top.Button1.configure(background='#cf305d')
             top.Button1.configure(text='''NOT CONNECTED ''')
-
         else:
             top.Label3.configure(background="#519c98")  # server
             top.Label4.configure(background="#519c98")  # MT_4
-
             if self.status_label_create:
                 top.Button1.destroy()
                 top.Label_Create()
@@ -482,23 +458,18 @@ class Run:
             else:
                 top.Button1.configure(background="#519c98")
                 top.Button1.configure(text='''CONNECTED ''')
-
             if len(self.response) != 0:
                 self.server_response_read()
 
     def mt4_send_signal(self, new_dic):
         if new_dic['signal_type'] == 'entry':
             self.mt4_open_trade(new_dic)
-
         if new_dic['signal_type'] == 'change_part':
             self.mt4_change_trade_close_partially(new_dic)
-
         if new_dic['signal_type'] == 'change_keep':
             self.mt4_change_trade_keep(new_dic)
-
         if new_dic['signal_type'] == 'close':
             self.mt4_close_trade(new_dic)
-
         if new_dic['signal_type'] == 'close_all':
             self.mt4_close_all()
 
@@ -538,7 +509,6 @@ class Run:
                 if y['_symbol'] == new_dic['symbol'] and y['_magic'] == 2020:
                     ticket = x
                     print(str(ticket) + 'that is the ticket')
-
                     self.zmq._DWX_MTX_MODIFY_TRADE_BY_TICKET_(ticket, new_dic['stop'], new_dic['limit'])
                     time.sleep(0.5)
                     mt_response = self.zmq._get_response_()
@@ -578,7 +548,6 @@ class Run:
         new_trade['_lots'] = self.lot_size
         new_trade['_comment'] = new_dic['provider']
         new_trade['_magic'] = 2020
-
         print(new_trade)
         self.zmq._DWX_MTX_NEW_TRADE_(_order=new_trade)
         time.sleep(0.5)
